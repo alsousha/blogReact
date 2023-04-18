@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import { posts } from '../../shared/projectData';
 import './BlogContent.css';
 import { AddPostForm } from './components/AddPostForm';
 import { BlogCard } from './components/BlogCard';
@@ -8,7 +7,8 @@ import axios from 'axios';
 export class BlogContent extends Component {
   state = {
     showAddForm: false,
-    blogArr: JSON.parse(localStorage.getItem('blogPosts')) || posts,
+    blogArr: [],
+    isPending: false,
   };
 
   likePost = (pos) => {
@@ -22,20 +22,36 @@ export class BlogContent extends Component {
     localStorage.setItem('blogPosts', JSON.stringify(temp));
   };
 
-  deletePost = (pos) => {
-    if (window.confirm(`Удалить ${this.state.blogArr[pos].title}?`)) {
-      const temp = [...this.state.blogArr];
-      temp.splice(pos, 1);
-
-      console.log('Эталонный массив =>', this.state.blogArr);
-      console.log('Измененный массив =>', temp);
-
-      this.setState({
-        blogArr: temp,
-      });
-
-      localStorage.setItem('blogPosts', JSON.stringify(temp));
+  deletePost = (id, pos) => {
+    // console.log('id', id);
+    if (window.confirm(`Delete ${this.state.blogArr[pos].title}?`)) {
+      axios
+        .delete('http://localhost:3001/posts/' + id)
+        .then((res) => {
+          //get all posts
+          this.fetchPosts();
+        })
+        .catch(() => {
+          alert('Sorry, we have some problem. Try again later');
+        });
+      // localStorage.setItem('blogPosts', JSON.stringify(temp));
     }
+  };
+  fetchPosts = () => {
+    this.setState({
+      isPending: true,
+    });
+    axios
+      .get('http://localhost:3001/posts')
+      .then((res) => {
+        this.setState({
+          blogArr: res.data,
+          isPending: false,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   handleAddFormShow = () => {
@@ -55,24 +71,21 @@ export class BlogContent extends Component {
   };
 
   addNewBlogPost = (blogPost) => {
-    this.setState((state) => {
-      const temp = [...state.blogArr];
-      temp.push(blogPost);
-      localStorage.setItem('blogPosts', JSON.stringify(temp));
-      return {
-        blogArr: temp,
-      };
-    });
+    console.log('bl', blogPost);
+    console.log(blogPost.id);
+    axios.post('http://localhost:3001/posts', blogPost.id).then();
+    // this.setState((state) => {
+    //   const temp = [...state.blogArr];
+    //   temp.push(blogPost);
+    //   localStorage.setItem('blogPosts', JSON.stringify(temp));
+    //   return {
+    //     blogArr: temp,
+    //   };
+    // });
   };
   componentDidMount() {
-    // axios
-    //   .get('https://5fb3db44b6601200168f7fba.mockapi.io/api/posts')
-    //   .then((res) => {
-    //     blogArr: res.data;
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    //get all posts
+    this.fetchPosts();
     //hide popup by Esc
     window.addEventListener('keyup', this.handleEscape);
   }
@@ -88,25 +101,30 @@ export class BlogContent extends Component {
           description={item.description}
           liked={item.liked}
           likePost={() => this.likePost(pos)}
-          deletePost={() => this.deletePost(pos)}
+          deletePost={() => this.deletePost(item.id, pos)}
         />
       );
     });
+
+    //show loading data while we are getting data from server
+    if (this.state.blogArr.length === 0) return <h1>Loading data...</h1>;
+
     return (
       <div className='blogPage'>
-        {this.state.showAddForm ? (
+        {this.state.showAddForm && (
           <AddPostForm
             blogArr={this.state.blogArr}
             addNewBlogPost={this.addNewBlogPost}
             handleAddFormHide={this.handleAddFormHide}
           />
-        ) : null}
+        )}
 
         <>
           <h1>Simple Blog</h1>
           <button className='blackBtn' onClick={this.handleAddFormShow}>
             Создать новый пост
           </button>
+          {this.state.isPending && <h2>Please wait...</h2>}
           <div className='posts'>{blogPosts}</div>
         </>
       </div>
