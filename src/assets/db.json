@@ -4,7 +4,27 @@
       "id": 2,
       "title": "Post 2",
       "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sapiente, fugiat harum. Voluptatibus beatae corrupti nulla, qui odit mollitia doloremque rerum magni rem aut laborum, maiores officiis laboriosam hic. Ratione, voluptas?",
-      "liked": false
+      "liked": true,
+      "laked": false
+    },
+    {
+      "title": "sa",
+      "description": "def",
+      "liked": true,
+      "id": 3,
+      "laked": true
+    },
+    {
+      "title": "sdf",
+      "description": "we",
+      "liked": false,
+      "id": 4
+    },
+    {
+      "title": "post 1",
+      "description": "sdgery dfgturtfgu fyuloyfou",
+      "liked": true,
+      "id": 5
     }
   ]
 }

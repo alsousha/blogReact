@@ -11,18 +11,24 @@ export class BlogContent extends Component {
     isPending: false,
   };
 
-  likePost = (pos) => {
-    const temp = [...this.state.blogArr];
-    temp[pos].liked = !temp[pos].liked;
-
-    this.setState({
-      blogArr: temp,
-    });
-
-    localStorage.setItem('blogPosts', JSON.stringify(temp));
+  likePost = (blogPost) => {
+    const temp = { ...blogPost }; //copy data of post to temp
+    temp.liked = !temp.liked; // change lacked
+    axios
+      .patch('http://localhost:3001/posts/' + blogPost.id, temp)
+      .then((res) => {
+        console.log('Post was changed', res.data);
+        this.fetchPosts();
+      })
+      .catch((err) => {
+        console.log('Sorry, we have some problem. Try again later', err);
+      });
   };
 
   deletePost = (id, pos) => {
+    this.setState({
+      isPending: true,
+    });
     // console.log('id', id);
     if (window.confirm(`Delete ${this.state.blogArr[pos].title}?`)) {
       axios
@@ -31,16 +37,13 @@ export class BlogContent extends Component {
           //get all posts
           this.fetchPosts();
         })
-        .catch(() => {
-          alert('Sorry, we have some problem. Try again later');
+        .catch((err) => {
+          console.log('Sorry, we have some problem. Try again later', err);
         });
       // localStorage.setItem('blogPosts', JSON.stringify(temp));
     }
   };
   fetchPosts = () => {
-    this.setState({
-      isPending: true,
-    });
     axios
       .get('http://localhost:3001/posts')
       .then((res) => {
@@ -71,17 +74,18 @@ export class BlogContent extends Component {
   };
 
   addNewBlogPost = (blogPost) => {
-    console.log('bl', blogPost);
-    console.log(blogPost.id);
-    axios.post('http://localhost:3001/posts', blogPost.id).then();
-    // this.setState((state) => {
-    //   const temp = [...state.blogArr];
-    //   temp.push(blogPost);
-    //   localStorage.setItem('blogPosts', JSON.stringify(temp));
-    //   return {
-    //     blogArr: temp,
-    //   };
-    // });
+    this.setState({
+      isPending: true,
+    });
+    axios
+      .post('http://localhost:3001/posts/', blogPost)
+      .then((res) => {
+        console.log('Post was create', res.data);
+        this.fetchPosts();
+      })
+      .catch((err) => {
+        console.log('Sorry, we have some problem. Try again later', err);
+      });
   };
   componentDidMount() {
     //get all posts
@@ -100,7 +104,7 @@ export class BlogContent extends Component {
           title={item.title}
           description={item.description}
           liked={item.liked}
-          likePost={() => this.likePost(pos)}
+          likePost={() => this.likePost(item)}
           deletePost={() => this.deletePost(item.id, pos)}
         />
       );

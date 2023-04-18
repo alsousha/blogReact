@@ -22,7 +22,7 @@ export class AddPostForm extends Component {
   createPost = (e) => {
     e.preventDefault(); //not reload page after click by submit
     const newPost = {
-      id: this.props.blogArr.length + 1,
+      //   id: this.props.blogArr.length + 1,
       title: this.state.postTitle,
       description: this.state.postDesc,
       liked: false,
