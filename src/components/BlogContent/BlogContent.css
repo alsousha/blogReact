@@ -1,8 +1,27 @@
+.blogPage{
+	position: relative;
+}
+.blogPage .preloader{
+	position: absolute;
+	left: 50%;
+	right: 50%;
+	top: 30%;
+	
+}
+.MuiCircularProgress-colorPrimary {
+    color: black !important;
+}
 .posts {
     width: 900px;
     margin: 0 auto;
+	position: relative;
 }
-
+.post{
+	width: calc(100% - 60px);
+}
+.postBtns{
+	display: flex;
+}
 .blackBtn {
     padding: 5px 15px;
     border-radius: 16px;

@@ -1,14 +1,18 @@
 import { Component } from 'react';
 import './BlogContent.css';
 import { AddPostForm } from './components/AddPostForm';
+import { EditPostForm } from './components/EditPostForm';
 import { BlogCard } from './components/BlogCard';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from 'axios';
 
 export class BlogContent extends Component {
   state = {
     showAddForm: false,
+    showEditForm: false,
     blogArr: [],
     isPending: false,
+    activEditPost: {},
   };
 
   likePost = (blogPost) => {
@@ -41,7 +45,25 @@ export class BlogContent extends Component {
           console.log('Sorry, we have some problem. Try again later', err);
         });
       // localStorage.setItem('blogPosts', JSON.stringify(temp));
+    } else {
+      this.setState({
+        isPending: false,
+      });
     }
+  };
+  editBlogPost = (post) => {
+    this.setState({
+      isPending: true,
+    });
+    axios
+      .patch('http://localhost:3001/posts/' + post.id, post)
+      .then((res) => {
+        //get all posts
+        this.fetchPosts();
+      })
+      .catch((err) => {
+        console.log('Sorry, we have some problem. Try again later', err);
+      });
   };
   fetchPosts = () => {
     axios
@@ -69,8 +91,16 @@ export class BlogContent extends Component {
     });
   };
 
-  handleEscape = (e) => {
-    if (e.key === 'Escape' && this.state.showAddForm) this.handleAddFormHide();
+  handleEditFormShow = (item) => {
+    this.setState({
+      showEditForm: true,
+      activEditPost: item,
+    });
+  };
+  handleEditFormHide = () => {
+    this.setState({
+      showEditForm: false,
+    });
   };
 
   addNewBlogPost = (blogPost) => {
@@ -90,12 +120,8 @@ export class BlogContent extends Component {
   componentDidMount() {
     //get all posts
     this.fetchPosts();
-    //hide popup by Esc
-    window.addEventListener('keyup', this.handleEscape);
   }
-  componentWillUnmount() {
-    window.removeEventListener('keyup', this.handleEscape);
-  }
+
   render() {
     const blogPosts = this.state.blogArr.map((item, pos) => {
       return (
@@ -105,6 +131,7 @@ export class BlogContent extends Component {
           description={item.description}
           liked={item.liked}
           likePost={() => this.likePost(item)}
+          handleEditdFormShow={() => this.handleEditFormShow(item)}
           deletePost={() => this.deletePost(item.id, pos)}
         />
       );
@@ -113,6 +140,7 @@ export class BlogContent extends Component {
     //show loading data while we are getting data from server
     if (this.state.blogArr.length === 0) return <h1>Loading data...</h1>;
 
+    const postsOpacity = this.state.isPending ? 0.5 : 1;
     return (
       <div className='blogPage'>
         {this.state.showAddForm && (
@@ -122,14 +150,25 @@ export class BlogContent extends Component {
             handleAddFormHide={this.handleAddFormHide}
           />
         )}
+        {this.state.showEditForm && (
+          <EditPostForm
+            blogArr={this.state.blogArr}
+            editBlogPost={(post) => this.editBlogPost(post)}
+            handleEditFormHide={this.handleEditFormHide}
+            activEditPost={this.state.activEditPost}
+          />
+        )}
 
         <>
           <h1>Simple Blog</h1>
           <button className='blackBtn' onClick={this.handleAddFormShow}>
             Создать новый пост
           </button>
-          {this.state.isPending && <h2>Please wait...</h2>}
-          <div className='posts'>{blogPosts}</div>
+
+          <div className='posts' style={{ opacity: postsOpacity }}>
+            {blogPosts}
+          </div>
+          <div className='preloader'>{this.state.isPending && <CircularProgress />}</div>
         </>
       </div>
     );
