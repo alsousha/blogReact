@@ -1,18 +1,34 @@
-import "./App.css";
-import { BlogContent } from "./components/BlogContent/BlogContent";
-import { Footer } from "./components/Footer/Footer";
-import { Header } from "./components/Header/Header";
+import { BrowserRouter } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+import './App.css';
+import { Footer } from './components/Footer/Footer';
+import { Header } from './components/Header/Header';
+import { BlogContent } from './containers/BlogContent/BlogContent';
+import LoginPage from './containers/loginPage/LoginPage';
+import { useState } from 'react';
 
 export function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+
+  const [userName, setUserName] = useState(localStorage.getItem('userName'));
+  //   const tmp = [() => <LoginPage />, () => <BlogContent />];
   return (
-    <div className="App">
-      <Header />
+    <BrowserRouter>
+      <div className='App'>
+        <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} userName={userName} />
 
-      <main>
-        <BlogContent random="Random props" />
-      </main>
+        <main>
+          <Routes>
+            <Route
+              path='/login'
+              element={<LoginPage setIsLoggedIn={setIsLoggedIn} setUserName={setUserName} />}
+            />
+            <Route path='/' element={<BlogContent />} />
+          </Routes>
+        </main>
 
-      <Footer year={new Date().getFullYear()} />
-    </div>
+        <Footer year={new Date().getFullYear()} />
+      </div>
+    </BrowserRouter>
   );
 }

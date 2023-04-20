@@ -1,0 +1,27 @@
+.loginForm {
+    
+    width: 600px;
+    padding: 20px;
+    text-align: center;
+    
+}
+.logonForm textarea{
+	height: 20rem;
+}
+
+.logonForm h2 {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.logonFormInput {
+    width: 100%;
+    padding: 4px 5px;
+    border-radius: 8px;
+    border: 1px solid rgb(138, 136, 136);
+	margin-bottom: 1rem;
+}
+
+.logonFormInput:focus::placeholder {
+    color: transparent;
+}

@@ -6,6 +6,8 @@ import { BlogCard } from './components/BlogCard';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from 'axios';
 
+let sourse; //to cancel axios request
+
 export class BlogContent extends Component {
   state = {
     showAddForm: false,
@@ -66,8 +68,9 @@ export class BlogContent extends Component {
       });
   };
   fetchPosts = () => {
+    sourse = axios.CancelToken.source();
     axios
-      .get('http://localhost:3001/posts')
+      .get('http://localhost:3001/posts', { CancelToken: sourse.token })
       .then((res) => {
         this.setState({
           blogArr: res.data,
@@ -78,7 +81,14 @@ export class BlogContent extends Component {
         console.log(err);
       });
   };
-
+  componentDidMount() {
+    //get all posts
+    this.fetchPosts();
+  }
+  componentWillUnmount() {
+    //cancel axios request by token when go to next page
+    if (sourse) sourse.cancel();
+  }
   handleAddFormShow = () => {
     this.setState({
       showAddForm: true,
@@ -117,10 +127,6 @@ export class BlogContent extends Component {
         console.log('Sorry, we have some problem. Try again later', err);
       });
   };
-  componentDidMount() {
-    //get all posts
-    this.fetchPosts();
-  }
 
   render() {
     const blogPosts = this.state.blogArr.map((item, pos) => {
